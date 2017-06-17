@@ -1,0 +1,27 @@
+// FOR
+*list source program
+*iocs(1132 printer)
+*one word integers
+C ROOTS - PRINT A TABLE OF SQUARE ROOTS FOR THE NUMBERS 1 TO 100
+
+      INTEGER I(4)
+      REAL A(4)
+
+      WRITE(3,10)
+   10 FORMAT('1SQUARE ROOTS FROM 1 TO 100 ---', /)
+
+      DO 40 N = 1, 25
+C         -- MAKE FOUR COLUMNS OF NUMBERS
+          DO 20 J = 1, 4
+             I(J) = (J-1)*25 + N
+             A(J) = SQRT(FLOAT(I(J)))
+   20     CONTINUE
+
+C         -- PRINT THE RESULTS USING THE QUIRKY 'IMPLIED DO LOOP'
+          WRITE(3,30) (I(J), A(J), J = 1, 4)
+   30     FORMAT(4(' SQRT(',I3,') =', F8.4, 3X))
+   40 CONTINUE
+
+      CALL EXIT
+      END
+// XEQ

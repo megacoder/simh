@@ -1,0 +1,80 @@
+These two object card decks are the "Symbolic Programming System", a
+primitive assembler for the 1401 that predates the famous Autocoder.
+
+To use SPS, write an SPS program using your favourite editor (two
+examples are provided, hello.sps and diaglist.sps).  SPS decks are
+not free-format, but operands must be placed in columns:
+
+ 1 -  5	Line Count (optional)
+ 6 -  7 Count (number of characters when defining a constant).
+ 8 - 13 Label (six characters must start with alphabetic).
+14 - 16 Opcode: Examples:
+		A = Add
+		B = Branch (must be d-mod for conditional)
+		BWZ = Branch if Wordmark or Zone
+		C = Compare
+		CC = Carriage Control (printer)
+		CS = CLear Storage
+		CU = Control Unit (e.g. tape)
+		CW = Clear Workmark
+		D = Divide
+		DC = Define Constant (no wordmark)
+		DCW = Define Constant (starts in 24, length in 6-7)
+		END = End of program
+		LCA = Load Characters
+		H = Halt
+		M = Multiply
+		MCE = Move and Edit
+		MCS = Move and Supress Zeros
+		MCW = Move Characters
+		MN = Move Numeric
+		MZ = Move Zone
+		ORG = Define Origin Point
+		P = Punch Card
+		R = Read Card
+		S = Subtract
+		SS = Stacker Select
+		SW = Set Wordmark
+		W = Write Line
+		ZA = Zero and Add
+		ZS = Zero and Subtract
+	Tape:
+		MCW %UX YYY W	Write Tape from addr YYY w/o wordmarks)
+		LCA %UX YYY W	Write Tape, Unit X from addr YYY w/wordmarks)
+		MCW %UX YYY R	Read Tape from addr YYY w/o wordmarks)
+		LCA %UX YYY R	Read Tape, Unit X from addr YYY w/wordmarks)
+		CU %UX M	Write Tape Mark
+		CU %UX E	Skip and Blank Tape
+		CU %UX B	Backspace Record
+		CU %UX R	Rewind Tape
+		CU %UX U	Rewind and Unlaod tape
+17 - 22 Address for A-operand (label or 4-digit actual address)
+23 - 23 blank, + or - to adjust A-operand by a constant
+24 - 26 3-digit number to adjust A-operand by if 23 is + or -
+27 - 27 Index (?)
+28 - 33 Address for B-operand
+34 - 34 Blank, + or -
+35 - 37 3-digit number of adjust B-address by if 34 is + or -
+38 - 38 Index (?)
+39 - 39 D-modifier for this instruction.  Notes:
+		/ = Compare is unequal
+		S = Branch if Compare Equal
+		T = B is less than A
+		U = B is greater than A
+		L = Tape read error
+		K = Tape end of reel
+40 - 55 Comments
+		
+
+Your SPS deck should start with an ORG operation to specify where in storage
+your program starts, and end with an END card, with an optional A-operand
+showing where to start execution.
+
+To assemble an SPS program, place your SPS source between the SPS1.OBJ and
+the SPS2.OBJ deck, and another copy of the same source after the SPS2.OBJ
+deck (SPS is a two-pass assembler).  You'll get a listing on LPT and your
+object deck will be punched, ready to run.
+
+A set of simulator commands that will assemble an SPS deck painlessly
+is in "sps".  You just enter "sps programname" and you'll get your output as
+programname.lst for the listing, and programname.obj for the object deck.

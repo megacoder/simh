@@ -1,0 +1,32 @@
+; command file to run ibsys from within simh
+; windows specific
+; argument 1 = job file
+; argument 2 = print file
+;
+! del punch.* print.* sysou1.* sys*.bin
+! gendate > date.txt
+! copy date.txt+%1+eof.dat+ibsys.ctl sysin.txt
+! txt2bcda sysin 84
+set cpu 7094
+att -er cdr ibsys.ctl
+att cdp punch.txt
+;att lpt print.txt
+att -ef mta1 p7b asys1.bin
+att -ef mta2 p7b asys8.bin
+att -f mta3 p7b sysin.bcd
+att -f mta4 p7b sysou1.bcd
+att mta5 sysut1.bin
+att mta6 sysut3.bin
+att mta7 sysut2.bin
+att mta8 syspp1.bin
+att mta9 sysut4.bin
+att mta10 sysck2.bin
+;d ss1 1
+boot mta1
+;run 3
+assert pc =7465
+det mta4
+! bcd2txta -p sysou1.bcd %2
+det all
+! del reader.* sys*.bin
+! del sysou1*.bcd sysin.*

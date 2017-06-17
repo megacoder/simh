@@ -1,0 +1,5 @@
+del gdu.lst
+att dsk dms.dsk
+att prt gdu.lst
+att cr @gdu.job
+boot dsk

@@ -1,0 +1,82 @@
+This 1401 Diagnostics tape is a bootable tape containing a series of 1401
+diagnostics dating from about 1962.  The 1407 Inquiry console is not used
+so all control is via the front panel.
+
+To run in the simulator, attach thusly:
+
+attach mt1 1401diag.mt
+attach lpt errorlist.txt
+boot mt1
+
+The machine will issue a HALT 433.  At this point, you can set sense
+switches and other options like this:
+
+D 1252 "1"	...Will cause headings to print for each test run. 
+		Otherwise no printing will occur unless there are errors.
+		
+D SSB 1		Loop if an error is detected.
+
+D SSC 1		"Correct Print" whatever that means
+
+D SSD 1		Repeat the test run over and over.
+
+D SSE 1		Halt if any error is detected, otherwise continue.
+
+When you continue from this halt (use G to Go), you'll get halt
+3001.  Enter G again and the tape will spin thru a series of basic
+CPU diagnostics.
+
+I don't know how to execute individual diagnostic routines from
+this tape yet.
+
+This is a listing of the diagnostics on the tape (it was produced
+by the SPS program "diaglist.sps". 
+
+,0080121001                                     COPY TEST TAPE          1T03A 0A                0002
+,008015,022029,033033N      1001                TEST CHARACTER & BRANCH 0050B00A                0004
+,008015,022029,033033N      1001                TEST ZONE OR WM & BR    0060B00A                0028
+,008015,022029,033033N      1001                COMPARE & BR UNEQUAL    0100B00A                0052
+,008015,022029,033033N      1001                LOAD MOVE COMPARE       0110B00A                0082
+,008015,022029,033033N      1001                LOAD MOVE DIGIT ZONE    0210C00A                0108
+,008015,022029,033033N      1001                MOVE & ZERO SUPPRESS    0230B00A                0128
+,008015,022029,033033N      1001                TRUE ADD                0300B00A                0147
+,008015,022029,033033N      1001                COMPLEMENT ADD          0310B00A                0164
+,008015,022029,033033N      1001                RESET ADD & SUB         0330B00A                0212
+,008015,022029,033033N      1001                ZONE ADD                0350B00A                0232
+,008015,022029,033033N      1001                BRANCH OVERFLOW         0360B00A                0266
+,008015,022029,033033N      1001                EDIT                    0370D00A                0290
+,008015,022029,033033N      1001                WORDMARK AND BUFFER TEST1010C 0A                0325
+,008015,022029,033033N      1001                RIPPLE PRINT            1020B 0A                0327
+,008015,022029,033033N      1001                RIPPLE PUNCH            1030B 0A                0329
+,008015,022029,033033N      1001                RIPPLE READ             1040B 0A                0331
+,008015,022029,033033N      1001                PRINT-PUNCH             1050B 0A                0335
+,008015,022029,033033N      1001                PRINT-READ              1060B 0A                0337
+,008015,022029,033033N      1001                READ-PUNCH              1070B 0A                0359
+,008015,022029,033033N      1001                PRINT-READ-PUNCH        1080B 0A                0381
+,008015,022029,033033N      1001                FORMS SPACING           2000C00A                0403
+,008015,022029,033033N      1001                SINGLE LINE SKIP TEST   2005A00A                0405
+,008015,022029,033033N      1001                FORMS SKIPPING          2010B00A                0407
+,008015,022029,033033N      1001                9 & 12 LATCH TEST       2020C00A                0409
+,008015,022029,033033N      1001                BRANCH ON PRINTER ERROR 9010D 0A                0411
+,008015,022029,033033N      1001                BRANCH ON PROCESS ERROR 9020D 0A                0413
+,008015,022029,033033N      1001                BRANCH ON PUNCH ERROR   9040C 0A                0415
+,008015,022029,033033N      1001                STORAGE WORST PATTERN   9100F 0A                0417
+,008015,022029,033033N      1001                BRANCH LAST CARD        9999B 0A                0420
+,008015,022029,033033N      1001                MOVE & BINARY DECODE    3000C 0A                0424
+,008015,022029,033033N      1001                MOVE & BINARY CODE      3010C 0A                0426
+,008015,022029,033033N      1001                PUNCH COLUMN BINARY     3020C 0A                0428
+,008015,022029,033033N      1001                READ COLUMN BINARY      3030C 0A                0430
+,008015,022029,033033N      1001                BIT TEST                3040C 0A                0434
+,008015,022029,033033N      1001                INDEXING & STORE STARS  3100D 0A                0456
+,008015,022029,033033N      1001                MOVE RECORD             3110D 0A                0488
+,008015,022029,033033N      1001                I-STAR TRANSFER         3130D 0A                0507
+,008015,022029,033033N      1001                MULTIPLY                3200D 0A                0522
+,008015,022029,033033N      1001                DIVIDE                  3210B 0A                0539
+,008015,022029,033033N      1001                BRANCH HIGH             3300B 0A                0570
+,008015,022029,033033N      1001                BRANCH LOW              3310B 0A                0572
+,008015,022029,033033N      1001                BRANCH EQUAL            3320B 0A                0574
+,008015,022029,033033N0000001001                HI-LO-EQUAL FIELD COMP. 3330B 0A                0593
+,008015,022029,033033N      1001                STACKER SELECT          9000C 0A                0607
+,0080121001                                     729-7330 IRG MEAS.      1T05C 0A                0611
+,0080121001                                     TAPE ERROR TEST         1T06A 0A                0622
+,0080121001                                     TAPE RELIABILITY        1T07A 0A                0624

@@ -1,0 +1,13 @@
+det prt
+delete asm.lst
+
+reset
+att dsk dms.dsk
+att prt asm.lst
+att cr  @asm.deck
+boot dsk
+
+det prt
+view asm.lst
+
+

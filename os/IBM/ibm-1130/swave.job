@@ -1,0 +1,35 @@
+// JOB
+// FOR
+*LIST SOURCE PROGRAM
+*IOCS(1132 PRINTER)
+*ONE WORD INTEGERS
+C-------------------------------------------------------
+C Plots a sine wave on the line printer
+C-------------------------------------------------------
+      dimension line(80)
+      data ispac, istar, ibar /' ', '*', 'I'/
+C
+      pi = 4.*atan(1.)
+C
+      write(3,10)
+  10  format('0  a           sin(a)', /, ' ----- ------ ------- ',
+     +8('----------'))
+C
+      do 40 i = 1, 61
+         do 20 j = 1, 80
+            line(j) = ispac
+  20     continue
+         line(40) = ibar
+C
+         a  = (i-1)*6.
+         r  = a*pi/180.
+         sa = sin(r)
+         j  = 40 + ifix(39.*sa + 0.5)
+         line(j) = istar
+
+         write(3,30) a, r, sa, (line(j), j = 1, 80)
+  30     format(1x, f5.0, f7.4, f8.4, 1x, 80a1)
+  40  continue
+      call exit
+      end
+// XEQ       

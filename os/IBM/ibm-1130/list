@@ -1,0 +1,9 @@
+det prt
+delete list.txt
+
+reset
+att prt list.txt
+att cr  list.job
+att dsk dms.dsk
+boot dsk
+det prt

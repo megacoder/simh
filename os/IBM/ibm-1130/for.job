@@ -1,0 +1,24 @@
+// JOB
+// FOR
+*one word integers
+*list all
+*iocs(1132 printer)
+**first fortran program on the emulator
+C
+C this is a test of the fortran compiler. Very simple, should not be a
+C big problem.
+C ---------------------------------------------------------------------
+C
+      do 10 i = 1, 10
+         write(3,5) i
+    5 format(' THIS IS ITERATION', I5)
+   10 continue
+      call exit
+      end
+// CPRNT
+// * about to XEX
+// CEND
+// xeq
+// CPRNT
+// * returned from program
+// CEND

@@ -1,0 +1,9 @@
+#!/bin/sh
+cat sps1.obj $1.sps sps2.obj $1.sps >deck
+echo "at cdr deck" >para.tmp
+echo "at cdp $1.obj" >>para.tmp
+echo "at lpt $1.lst" >>para.tmp
+echo "b cdr" >>para.tmp
+./1401 para.tmp
+rm para.tmp
+

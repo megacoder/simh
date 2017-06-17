@@ -1,0 +1,12 @@
+reset
+detach prt
+delete for.lst
+
+att dsk dms.dsk
+att prt for.lst
+att cr @for.deck %1
+boot dsk
+
+det prt
+det cr
+view for.lst

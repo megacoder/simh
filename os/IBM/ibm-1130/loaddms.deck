@@ -1,0 +1,519 @@
+* LOADDMS ***********************************************************
+* Loads DMS V2 R12 onto a freshly formatted disk (use DO FORMAT to create this)
+* To run,
+*    ATTACH PRT loaddms.lst
+*    ATTACH CR @loaddms.deck
+*    BOOT CR
+*
+* In this file, lines starting with * are comments, ! indicates
+* a literal card, and other lines indicate files to be interpolated.
+* The indicators 'b' and 'a' indicate binary and ascii->hollerith
+* conversion, respectively.
+*********************************************************************
+
+*********************************************************************
+* cold boot, core image loader, system loader part 1
+*********************************************************************
+
+dbootcd1.ipl		b	cold start card in 1130 IPL format
+dbootcd2.dat		b	secondary boot in 1800 IPL format
+dciloadr.dat		b	core image loader in 1800 IPL format
+dsysldr1.dat		b	system loader part 1 in core image format
+
+*********************************************************************
+* load mode card
+*********************************************************************
+
+!MODE   I     R
+
+*********************************************************************
+* All remaining binary decks are in card object format, which is
+* directly produced by the asm1130 cross assembler.
+
+* Note: the system phases and library routines CANNOT be assembled by
+* the 1130's own macro assembler for three reasons:
+*
+*   - There is no support therein for the *SBRK cards.
+*
+*   - The 1130 assembler's floating point constants are not compiled
+*     to full precision (yikes!)
+*
+*   - The 1130 assembler has a bug that prevents its accepting 
+*     option specifications like ISS, ILS, and LIBR (found in the
+*     library routines) after a HDNG directive. The source decks would
+*     have to be rearranged to be compiled by the 1130 assembler.
+*
+* The original 1130 load decks were always generated on a S/360 or
+* S/370 machine with a cross assembler, so we're actually doing the
+* right thing here.
+*********************************************************************
+
+*********************************************************************
+* resident monitor and system loader part 2
+*********************************************************************
+
+dmsr2v12\emonitor.bin	b	resident monitor, coldstart prgm (part of PMONITOR)
+dmsr2v12\fsysldr2.bin	b	system loader part 2
+
+*********************************************************************
+* system configuration cards
+*********************************************************************
+
+!SCON                                                                    CONFIG01
+!REQ      1    1442-7                                                    CONFIG02
+!REQ      6    1132                                                      CONFIG03
+*!REQ      9    1403                                                      CONFIG03
+!TERM                                                                    CONFIG04
+!PHID   1  18  31  57  81  92 110 116 120 132 140 152 160 161   1 V02 M12CONFIG05
+!PHID 176 204 205 206 207 246                                     V02 M12CONFIG06
+
+*********************************************************************
+* deck part 5 - system phases
+*********************************************************************
+
+dmsr2v12\jadupco.bin	b	DUP phase 1
+dmsr2v12\jbdupctl.bin	b
+dmsr2v12\jcstore.bin	b
+dmsr2v12\jdfileq.bin	b
+dmsr2v12\jedupdmp.bin	b
+dmsr2v12\jfdmplet.bin	b
+dmsr2v12\jgdelete.bin	b
+dmsr2v12\jhdefine.bin	b
+dmsr2v12\jidexit.bin	b
+dmsr2v12\jjcdface.bin	b
+dmsr2v12\jkkbface.bin	b
+dmsr2v12\jlptface.bin	b
+dmsr2v12\jqpreci.bin	b	DUP phases 13-18
+
+dmsr2v12\kforph01.bin	b	FORTRAN phase 31
+dmsr2v12\kforph02.bin	b
+dmsr2v12\kforph03.bin	b
+dmsr2v12\kforph04.bin	b
+dmsr2v12\kforph05.bin	b
+dmsr2v12\kforph06.bin	b
+dmsr2v12\kforph07.bin	b
+dmsr2v12\kforph08.bin	b
+dmsr2v12\kforph09.bin	b
+dmsr2v12\kforph10.bin	b
+dmsr2v12\kforph11.bin	b
+dmsr2v12\kforph12.bin	b
+dmsr2v12\kforph13.bin	b
+dmsr2v12\kforph14.bin	b
+dmsr2v12\kforph15.bin	b
+dmsr2v12\kforph16.bin	b
+dmsr2v12\kforph17.bin	b
+dmsr2v12\kforph18.bin	b
+dmsr2v12\kforph19.bin	b
+dmsr2v12\kforph20.bin	b
+dmsr2v12\kforph21.bin	b
+dmsr2v12\kforph22.bin	b
+dmsr2v12\kforph23.bin	b
+dmsr2v12\kforph24.bin	b
+dmsr2v12\kforph25.bin	b
+dmsr2v12\kforph26.bin	b
+dmsr2v12\kforph27.bin	b	FORTRAN phase 57
+
+dmsr2v12\namcra.bin	b	supervisor phases 110-114
+dmsr2v12\nbsysdmp.bin	b	supervisor phase 115 
+dmsr2v12\ncauxsup.bin	b	supervisor phase 116
+
+dmsr2v12\ocldbldr.bin	b	core load builder phases 120-132
+dmsr2v12\pmondevs.bin	b	rest of pmonitor: devices (140-149), disks (151-152), ci loader (160-161)
+dmsr2v12\psadctl2.bin	b	DUP part 2 phase 205
+dmsr2v12\psbmup.bin	b	DUP part 2 phase 206
+ptmasmbl.dat	 	b	assembler phases 207-246 (phases sorted post assembly, blech!)
+
+*********************************************************************
+* "type 81" card to denote the end of the system phases
+*********************************************************************
+
+!  61         6 and 1 punch make /8100 in word 3 in binary format
+
+*********************************************************************
+* system library. This is handled by DUP, which is run by the loader
+*********************************************************************
+
+!*STORE    2 CD  UA  FADD
+dmsr2v12\r1fadd.bin	b
+!*STORE    2 CD  UA  FAXI
+dmsr2v12\r1faxi.bin	b
+!*STORE    2 CD  UA  FDIV
+dmsr2v12\r1fdiv.bin	b
+!*STORE    2 CD  UA  FDVR
+dmsr2v12\r1fdvr.bin	b
+!*STORE    0 CD  UA  FGETP
+dmsr2v12\r1fegtp.bin	b                            note typo in filename
+!*STORE    2 CD  UA  FLD
+dmsr2v12\r1fld.bin	b
+!*STORE    2 CD  UA  FMPY
+dmsr2v12\r1fmpy.bin	b
+!*STORE    2 CD  UA  FSBR
+dmsr2v12\r1fsbr.bin	b
+!*STORE    8 CD  UA  FABS
+dmsr2v12\r2fabs.bin	b
+!*STORE    8 CD  UA  FATN
+dmsr2v12\r2fatn.bin	b
+!*STORE    8 CD  UA  FAXB
+dmsr2v12\r2faxb.bin	b
+!*STORE    8 CD  UA  FEXP
+dmsr2v12\r2fexp.bin	b
+!*STORE    8 CD  UA  FLN
+dmsr2v12\r2fln.bin	b
+!*STORE    8 CD  UA  FSIGN
+dmsr2v12\r2fsign.bin	b
+!*STORE    8 CD  UA  FSIN
+dmsr2v12\r2fsin.bin	b
+!*STORE    8 CD  UA  FSQR
+dmsr2v12\r2fsqr.bin	b
+!*STORE    8 CD  UA  FTANH
+dmsr2v12\r2ftanh.bin	b
+!*STORE    0 CD  UA  SFAR
+dmsr2v12\r2sfar.bin	b
+!*STORE    0 CD  UA  SFIF
+dmsr2v12\r2sfif.bin	b
+!*STORE    2 CD  UA  EADD
+dmsr2v12\s1eadd.bin	b
+!*STORE    2 CD  UA  EAXI
+dmsr2v12\s1eaxi.bin	b
+!*STORE    2 CD  UA  EDIV
+dmsr2v12\s1ediv.bin	b
+!*STORE    2 CD  UA  EDVR
+dmsr2v12\s1edvr.bin	b
+!*STORE    2 CD  UA  EGETP
+dmsr2v12\s1egetp.bin	b
+!*STORE    0 CD  UA  ELD
+dmsr2v12\s1eld.bin	b
+!*STORE    2 CD  UA  EMPY
+dmsr2v12\s1empy.bin	b
+!*STORE    2 CD  UA  ESBR
+dmsr2v12\s1esbr.bin	b
+!*STORE    8 CD  UA  EABS
+dmsr2v12\s2eabs.bin	b
+!*STORE    8 CD  UA  EATN
+dmsr2v12\s2eatn.bin	b
+!*STORE    8 CD  UA  EAXB
+dmsr2v12\s2eaxb.bin	b
+!*STORE    8 CD  UA  EEXP
+dmsr2v12\s2eexp.bin	b
+!*STORE    8 CD  UA  ELN
+dmsr2v12\s2eln.bin	b
+!*STORE    8 CD  UA  ESIGN
+dmsr2v12\s2esign.bin	b
+!*STORE    8 CD  UA  ESINE                           note unusual filename
+dmsr2v12\s2esin.bin	b
+!*STORE    8 CD  UA  ESQR
+dmsr2v12\s2esqr.bin	b
+!*STORE    8 CD  UA  ETANH
+dmsr2v12\s2etanh.bin	b
+!*STORE    0 CD  UA  SEAR
+dmsr2v12\s2sear.bin	b
+!*STORE    0 CD  UA  SEIF
+dmsr2v12\s2seif.bin	b
+!*STORE    2 CD  UA  FARC
+dmsr2v12\s3farc.bin	b
+!*STORE    2 CD  UA  FIXI
+dmsr2v12\s3fixi.bin	b
+!*STORE    0 CD  UA  FLOAT
+dmsr2v12\s3float.bin	b
+!*STORE    0 CD  UA  IFIX
+dmsr2v12\s3ifix.bin	b
+!*STORE    0 CD  UA  NORM
+dmsr2v12\s3norm.bin	b
+!*STORE    2 CD  UA  SNR
+dmsr2v12\s3snr.bin	b
+!*STORE    2 CD  UA  XDD
+dmsr2v12\s3xdd.bin	b
+!*STORE    2 CD  UA  XMD
+dmsr2v12\s3xmd.bin	b
+!*STORE    2 CD  UA  XMDS
+dmsr2v12\s3xmds.bin	b
+!*STORE    0 CD  UA  FBTD
+dmsr2v12\t1fbtd.bin	b
+!*STORE    8 CD  UA  IABS
+dmsr2v12\t1iabs.bin	b
+!*STORE    8 CD  UA  XSQR
+dmsr2v12\t1xsqr.bin	b
+!*STORE    0 CD  UA  PAUSE
+dmsr2v12\t2pause.bin	b
+!*STORE    2 CD  UA  STOP
+dmsr2v12\t2stop.bin	b
+!*STORE    0 CD  UA  SUBIN
+dmsr2v12\t2subin.bin	b
+!*STORE    0 CD  UA  SUBSC
+dmsr2v12\t2subsc.bin	b
+!*STORE    0 CD  UA  TTEST
+dmsr2v12\t2ttest.bin	b
+!*STORE    8 CD  UA  DATSW
+dmsr2v12\t3datsw.bin	b
+!*STORE    8 CD  UA  DVCHK
+dmsr2v12\t3dvchk.bin	b
+!*STORE    8 CD  UA  FCTST
+dmsr2v12\t3fctst.bin	b
+!*STORE    8 CD  UA  ISIGN
+dmsr2v12\t3isign.bin	b
+!*STORE    8 CD  UA  OVERF
+dmsr2v12\t3overf.bin	b
+!*STORE    0 CD  UA  PDUMP
+dmsr2v12\t3pdump.bin	b
+!*STORE    8 CD  UA  SLITE
+dmsr2v12\t3slite.bin	b
+!*STORE    8 CD  UA  TSTOP
+dmsr2v12\t3tstop.bin	b
+!*STORE    8 CD  UA  TSTRT
+dmsr2v12\t3tstrt.bin	b
+!*STORE    1 CD  UA  SDFIO
+dmsr2v12\t4sdfio.bin	b
+!*STORE    1 CD  UA  SDFND
+dmsr2v12\t4sdfnd.bin	b
+!*STORE    3 CD  UA  SFIO
+dmsr2v12\t4sfio.bin	b
+!*STORE    1 CD  UA  UFIO
+dmsr2v12\t4ufio.bin	b
+!*STORE    3 CD  UA  CARDZ
+dmsr2v12\t5cardz.bin	b
+!*STORE    3 CD  UA  EBCTB
+dmsr2v12\t5ebctb.bin	b
+!*STORE    3 CD  UA  GETAD
+dmsr2v12\t5getad.bin	b
+!*STORE    3 CD  UA  HOLEZ
+dmsr2v12\t5holez.bin	b
+!*STORE    3 CD  UA  HOLTB
+dmsr2v12\t5holtb.bin	b
+!*STORE    3 CD  UA  PAPTZ
+dmsr2v12\t5paptz.bin	b
+!*STORE    3 CD  UA  PNCHZ
+dmsr2v12\t5pnchz.bin	b
+!*STORE    3 CD  UA  PRNTZ
+dmsr2v12\t5prntz.bin	b
+!*STORE    3 CD  UA  PRNZ
+dmsr2v12\t5prnz.bin	b
+!*STORE    3 CD  UA  READZ
+dmsr2v12\t5readz.bin	b
+!*STORE    3 CD  UA  TYPEZ
+dmsr2v12\t5typez.bin	b
+!*STORE    3 CD  UA  WRTYZ
+dmsr2v12\t5wrtyz.bin	b
+!*STORE    0 CD  UA  SGOTO
+dmsr2v12\t6sgoto.bin	b
+!*STORE    0 CD  UA  SIAR
+dmsr2v12\t6siar.bin	b
+!*STORE    0 CD  UA  SIIF
+dmsr2v12\t6siif.bin	b
+!*STORE    0 CD  UA  ILS00
+dmsr2v12\u1ils00.bin	b
+!*STORE    0 CD  UA  ILS01
+dmsr2v12\u1ils01.bin	b
+!*STORE    1 CD  UA  ILS02
+dmsr2v12\u1ils02.bin	b
+!*STORE    0 CD  UA  ILS03
+dmsr2v12\u1ils03.bin	b
+!*STORE    1 CD  UA  ILS04
+dmsr2v12\u1ils04.bin	b
+!*STORE    0 CD  UA  ILSX0
+dmsr2v12\u1ilsx0.bin	b
+!*STORE    0 CD  UA  ILSX1
+dmsr2v12\u1ilsx1.bin	b
+!*STORE    0 CD  UA  ILSX2
+dmsr2v12\u1ilsx2.bin	b
+!*STORE    0 CD  UA  ILSX3
+dmsr2v12\u1ilsx3.bin	b
+!*STORE    0 CD  UA  ILSX4
+dmsr2v12\u1ilsx4.bin	b
+!*STORE    0 CD  UA  CARD0
+dmsr2v12\u2card0.bin	b
+!*STORE    0 CD  UA  CARD1
+dmsr2v12\u2card1.bin	b
+!*STORE    0 CD  UA  OMPR1
+dmsr2v12\u2ompr1.bin	b
+!*STORE    0 CD  UA  PAPT1
+dmsr2v12\u2papt1.bin	b
+!*STORE    0 CD  UA  PAPTN
+dmsr2v12\u2paptn.bin	b
+!*STORE    0 CD  UA  PAPTX
+dmsr2v12\u2paptx.bin	b
+!*STORE    0 CD  UA  PLOT1
+dmsr2v12\u2plot1.bin	b
+!*STORE    0 CD  UA  PNCH0
+dmsr2v12\u2pnch0.bin	b
+!*STORE    0 CD  UA  PNCH1
+dmsr2v12\u2pnch1.bin	b
+!*STORE    0 CD  UA  PRNT1
+dmsr2v12\u2prnt1.bin	b
+!*STORE    0 CD  UA  PRNT3
+dmsr2v12\u2prnt3.bin	b
+!*STORE    0 CD  UA  READ0
+dmsr2v12\u2read0.bin	b
+!*STORE    0 CD  UA  READ1
+dmsr2v12\u2read1.bin	b
+!*STORE    0 CD  UA  TYPE0
+dmsr2v12\u2type0.bin	b
+!*STORE    0 CD  UA  WRTY0
+dmsr2v12\u2wrty0.bin	b
+!*STORE    0 CD  UA  EBPRT
+dmsr2v12\u3ebprt.bin	b
+!*STORE    0 CD  UA  HOLEB
+dmsr2v12\u3holeb.bin	b
+!*STORE    0 CD  UA  HOLPR
+dmsr2v12\u3holpr.bin	b
+!*STORE    0 CD  UA  HXBIN
+dmsr2v12\u3hxbin.bin	b
+!*STORE    0 CD  UA  PAPEB
+dmsr2v12\u3papeb.bin	b
+!*STORE    0 CD  UA  PAPHL
+dmsr2v12\u3paphl.bin	b
+!*STORE    0 CD  UA  PAPPR
+dmsr2v12\u3pappr.bin	b
+!*STORE    0 CD  UA  SPEED
+dmsr2v12\u3speed.bin	b
+!*STORE    0 CD  UA  ZIPCO
+dmsr2v12\u3zipco.bin	b
+!*STORE    0 CD  UA  BIDEC
+dmsr2v12\u4bidec.bin	b
+!*STORE    0 CD  UA  BINDC
+dmsr2v12\u4bindc.bin	b
+!*STORE    0 CD  UA  BINHX
+dmsr2v12\u4binhx.bin	b
+!*STORE    0 CD  UA  CPEBC
+dmsr2v12\u4cpebc.bin	b
+!*STORE    0 CD  UA  CPHOL
+dmsr2v12\u4cphol.bin	b
+!*STORE    0 CD  UA  CPPT3
+dmsr2v12\u4cppt3.bin	b
+!*STORE    0 CD  UA  DCBIN
+dmsr2v12\u4dcbin.bin	b
+!*STORE    0 CD  UA  DECBI
+dmsr2v12\u4decbi.bin	b
+!*STORE    0 CD  UA  EBCCP
+dmsr2v12\u4ebccp.bin	b
+!*STORE    0 CD  UA  EBHOL
+dmsr2v12\u4ebhol.bin	b
+!*STORE    0 CD  UA  EBPA
+dmsr2v12\u4ebpa.bin	b
+!*STORE    0 CD  UA  EBPT3
+dmsr2v12\u4ebpt3.bin	b
+!*STORE    0 CD  UA  HLEBC
+dmsr2v12\u4hlebc.bin	b
+!*STORE    0 CD  UA  HLPT3
+dmsr2v12\u4hlpt3.bin	b
+!*STORE    0 CD  UA  HOLCP
+dmsr2v12\u4holcp.bin	b
+!*STORE    0 CD  UA  HOLL
+dmsr2v12\u4holl.bin	b
+!*STORE    0 CD  UA  PRTY
+dmsr2v12\u4prty.bin	b
+!*STORE    0 CD  UA  PT3CP
+dmsr2v12\u4pt3cp.bin	b
+!*STORE    0 CD  UA  PT3EB
+dmsr2v12\u4pt3eb.bin	b
+!*STORE    0 CD  UA  PTHOL
+dmsr2v12\u4pthol.bin	b
+!*STORE    0 CD  UA  DMP80
+dmsr2v12\u5dmp80.bin	b
+!*STORE    0 CD  UA  DMPD1
+dmsr2v12\u5dmpd1.bin	b
+!*STORE    0 CD  UA  DMTD0
+dmsr2v12\u5dmtd0.bin	b
+!*STORE    0 CD  UA  FLIPR
+dmsr2v12\u5flipr.bin	b
+!*STORE    0 CD  UA  SYSUP
+dmsr2v12\u5sysup.bin	b
+!*STORE      CD  UA  ADRWS
+dmsr2v12\u6adrws.bin	b
+!*STORE      CD  UA  COPY
+dmsr2v12\u6copy.bin	b
+!*STORE      CD  UA  DISC
+dmsr2v12\u6disc.bin	b
+!*STORE      CD  UA  DLCIB
+dmsr2v12\u6dlcib.bin	b
+!*STORE      CD  UA  DSLET
+dmsr2v12\u6dslet.bin	b
+!*STORE      CD  UA  ID
+dmsr2v12\u6id.bin	b
+!*STORE      CD  UA  IDENT
+dmsr2v12\u6ident.bin	b
+!*STORE      CD  UA  MODIF
+dmsr2v12\u6modif.bin	b
+!*STORE      CD  UA  MODSF
+dmsr2v12\u6modsf.bin	b
+!*STORE      CD  UA  PTUTL
+dmsr2v12\u6ptutl.bin	b
+!*STORE    0 CD  UA  CALPR
+dmsr2v12\u7calpr.bin	b
+!*STORE    0 CD  UA  FSLEN
+dmsr2v12\u7fslen.bin	b
+!*STORE    0 CD  UA  RDREC
+dmsr2v12\u7rdrec.bin	b
+!*STORE    0 CD  UA  ECHAR
+dmsr2v12\v1echar.bin	b
+!*STORE    0 CD  UA  ECHRX
+dmsr2v12\v1echrx.bin	b
+!*STORE    0 CD  UA  EGRID
+dmsr2v12\v1egrid.bin	b
+!*STORE    0 CD  UA  EPLOT
+dmsr2v12\v1eplot.bin	b
+!*STORE    0 CD  UA  ERULE
+dmsr2v12\v1erule.bin	b
+!*STORE    0 CD  UA  FCHAR
+dmsr2v12\v1fchar.bin	b
+!*STORE    0 CD  UA  FCHRX
+dmsr2v12\v1fchrx.bin	b
+!*STORE    0 CD  UA  FGRID
+dmsr2v12\v1fgrid.bin	b
+!*STORE    0 CD  UA  FPLOT
+dmsr2v12\v1fplot.bin	b
+!*STORE    0 CD  UA  FRULE
+dmsr2v12\v1frule.bin	b
+!*STORE    2 CD  UA  PLOTI
+dmsr2v12\v1ploti.bin	b
+!*STORE    0 CD  UA  PLOTX
+dmsr2v12\v1plotx.bin	b
+!*STORE    0 CD  UA  POINT
+dmsr2v12\v1point.bin	b
+!*STORE    0 CD  UA  SCALE
+dmsr2v12\v1scale.bin	b
+!*STORE    0 CD  UA  SCALF
+dmsr2v12\v1scalf.bin	b
+!*STORE    2 CD  UA  XYPLT
+dmsr2v12\v1xyplt.bin	b
+!*STORE      CD  UA  DFCNV
+dmsr2v12\w1dfcnv.bin	b
+!*STORE    0 CD  UA  EBC48
+dmsr2v12\w1ebc48.bin	b
+!*STORE    0 CD  UA  HOL48
+dmsr2v12\w1hol48.bin	b
+!*STORE    0 CD  UA  HOLCA
+dmsr2v12\w1holca.bin	b
+!*STORE    0 CD  UA  HXCV
+dmsr2v12\w1hxcv.bin	b
+!*STORE    0 CD  UA  IOLOG
+dmsr2v12\w1iolog.bin	b
+!*STORE    0 CD  UA  PRNT2
+dmsr2v12\w1prnt2.bin	b
+!*STORE    3 CD  UA  PRTZ2
+dmsr2v12\w1prtz2.bin	b
+!*STORE    0 CD  UA  SCAT1
+dmsr2v12\w1scat1.bin	b
+!*STORE    0 CD  UA  SCAT2
+dmsr2v12\w1scat2.bin	b
+!*STORE    0 CD  UA  SCAT3
+dmsr2v12\w1scat3.bin	b
+!*STORE    0 CD  UA  STRTB
+dmsr2v12\w1strtb.bin	b
+!*STORE    0 CD  UA  FEB41
+dmsr2v12\w5feb41.bin	b
+!*STORE    0 CD  UA  MTCA0
+dmsr2v12\w5mtca0.bin	b
+!*STORE    0 CD  UA  MTCAZ
+dmsr2v12\w5mtcaz.bin	b
+!*STORE    0 CD  UA  TSM41
+dmsr2v12\w5tsm41.bin	b
+!*STORE    0 CD  UA  TSTTY
+dmsr2v12\w5tstty.bin	b
+!*STORE    0 CD  UA  UCART
+dmsr2v12\zucart.bin	b                           not sure if this was usually loaded
+
+* This would be the end of the load job. Just for kicks,
+* let's make a listing of the disk directory (LET)
+* and system equivalence table (SLET)
+!*DUMPLET
+!// XEQ DSLET

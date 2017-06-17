@@ -1,0 +1,85 @@
+Autocoder+IOCS.tap
+
+This is a version of Autocoder that includes IOCS macros.  I don't know how
+many updates have been applied.  It is set up to return to the 1410 operating
+system at the end of the run: It prints "SWITCH TO 1410 MODE, RESET  START" at
+the end.  Remember, the 1410 had a switch that let it run 1401 programs
+natively.  I think it's set up for SimH traditional encoding.  I got this from
+Paul Pierce.
+
+Autocoder.Weaver.tap
+
+This is a version of Autocoder that incorporates eleven update letters, plus a
+custom modification to print the A- and B-address fields of instructions in
+decimal as well as machine form.  It has a few macros, but no IOCS.  I think
+it's set up for SimH traditional encoding.  I got this from Dick Weaver.
+
+To run Autocoder in simh:
+
+at mt1 autocoder
+at mt4 scratch.mt4
+at mt5 scratch.mt5
+at mt6 scratch.mt6
+at cdr source
+at cdp object
+at lpt listing
+b mt1
+
+where "autocoder" is one of the Autocoder tapes, "source" is your source code,
+"object" is the file to which the object deck will be "punched" and "listing"
+is the file to which the listing will be "printed".  For more information on
+operating Autocoder, refer to 
+http://www.bitsavers.org/pdf/ibm/14xx/C24-3319-0_1401_tapeAutocod.pdf.
+
+When you're done, you can delete the three scratch tape files.
+
+================================================================================
+
+Fortran_v3m0.tap
+
+This is Version 3, modification 0 of Fortran 1401-FO-050, a pre-Fortran-II
+Fortran, not Fortran IV.  I think it's set up for SimH traditional encoding.  I
+got this from Al Kossow.
+
+Fortran_v3m4.tap
+
+This is Version 3, modification 4 of Fortran 1401-FO-050, a pre-Fortran-II
+Fortran, not Fortran IV.  I think it's set up for SimH traditional encoding.  I
+got this from Paul Pierce.
+
+To run Fortran in simh:
+
+at mt1 fortran
+at cdr deck
+at lpt listing
+at cdp object     if object deck is to be punched (see "control card" below)
+b mt1
+Set up to run the program -- sense switches, tapes, ....
+g                 to run the program
+
+where "fortran" is one of the Fortran tapes, "deck" is a control card
+(described below) followed by the source code, optionally followed by a card
+with a 5-8 punch in column 1 and then data, "listing" is the file to contain
+the program listing, and "object" is the file to contain the object deck.
+
+The control card has
+
+1-5   PARAM - this field identifies the control card
+6-8   maximum machine address the compiler and object program are to use, e.g.
+      I9Z for 8k, I9R for 12k, I9I for 16k
+9-10  Fixed-point modulus (number of digits) k = 01 ... 20.  Blank means k=5.
+11-12 Floating-point mantissa length (number of digits) f = 02 ... 20.  Blank
+      means f = 8.
+13    P, if condensed deck is desired, blank if not.
+14    S, if storage snapshot is desired, blank if not.
+15    T, if processing on the IBM 1410 in 1401 compatibility mode.
+16    X, if no format routine is desired
+      L, if the limited format routine (READ TAPE, WRITE TAPE operations only)
+         is desired
+      b (blank), if the ordinary format routine is to be used
+      A, if the A-conversion format routine is to be added to the ordinary
+         format routine.  The A must be punched for A-conversion to operate
+         correctly.
+
+For more information on operating the Fortran compiler, refer to
+http://www.bitsavers.org/pdf/ibm/14xx/C24-1455-2_1401_fortran.pdf.

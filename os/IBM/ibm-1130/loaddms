@@ -1,0 +1,62 @@
+; LOADDMS - IBM 1130 EMULATOR "DO" FILE
+; FORMATS AND LOADS THE DISK MONITOR SYSTEM ONTO DISK IMAGE DMS.DSK
+;******************************************************************
+
+; set the hardware configuration (1132 printer, 16K memory = emulator default)
+
+set prt 1132
+set cpu 16k
+
+; detach & delete any previous listing file
+
+set gui off
+detach cpu
+detach prt
+delete loaddms.lst
+
+; prepare to create the system disk image "dms.dsk"
+
+attach dsk dms.dsk
+
+; format the disk using ZDCIP. Use cartridge ID 1234
+
+echo
+echo Formatting disk cartridge...
+
+reset
+deposit ces 0
+load zdcip.out
+go
+deposit ces 0200
+go
+deposit ces 0
+go
+deposit ces 1234
+go
+go
+deposit ces 0
+go
+
+; display current configuration
+
+echo
+echo Configuration:
+show cpu
+show prt
+
+; run the system loader deck
+
+reset
+attach prt loaddms.lst
+attach -q cr  @loaddms.deck
+
+echo
+echo Running system load deck...
+boot cr
+
+echo
+echo Finished. You may now view the load listing "loaddms.lst"
+detach prt
+detach cr
+view loaddms.lst
+
